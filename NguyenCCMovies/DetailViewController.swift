@@ -8,16 +8,11 @@
 
 import UIKit
 
-class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class DetailViewController: UIViewController {
     
     @IBOutlet var movieImage: UIImageView!
-    var movieTitle = ""
-    var posterPath = ""
+    var movie: Movie!
     var backgroundImage = UIImage()
-    var movieReleaseDate = ""
-    var movieOverview = ""
-    var movieAverageRated = ""
-    var movieVoteCount = ""
     let lowResolutionimageBaseURL = "https://image.tmdb.org/t/p/w45"
     let highResolutionimageBaseURL = "https://image.tmdb.org/t/p/original"
     @IBOutlet var movieDetailTableView: UITableView!
@@ -47,6 +42,23 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
         return resultImage!
     }
     
+    
+    func loadMovieToCell(movie: Movie, indexPath: IndexPath, cell: DetailTableViewCell) -> Void {
+        let index = movie.releaseDate!.index(movie.releaseDate.startIndex, offsetBy: 4)
+        let yearRelease = movie.releaseDate!.substring(to: index)
+        cell.movieTitle.text = movie.title! + " (\(yearRelease))"
+        cell.movieAverageRated.text = "\(movie.averageRated!) / 10"
+        cell.movieTitle.sizeToFit()
+        cell.movieReleaseDate.text = "Released date: \(movie.releaseDate!)"
+        cell.movieReleaseDate.sizeToFit()
+        cell.movieVoteCount.text = "Voted: \(movie.ratedCount!)"
+        cell.movieVoteCount.sizeToFit()
+        cell.movieOverview.text = "Overview: \(movie.overview!)"
+        cell.movieOverview.sizeToFit()
+    }
+}
+
+extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -64,25 +76,17 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = movieDetailTableView.dequeueReusableCell(withIdentifier: "DetailCell") as! DetailTableViewCell
         cell.layer.cornerRadius = 5
         cell.layer.masksToBounds = true
-        let index = movieReleaseDate.index(movieReleaseDate.startIndex, offsetBy: 4)
-        let yearRelease = movieReleaseDate.substring(to: index)
-        cell.movieTitle.text = movieTitle + " (\(yearRelease))"
-        cell.movieAverageRated.text = "\(movieAverageRated) / 10"
-        cell.movieTitle.sizeToFit()
-        cell.movieReleaseDate.text = "Released date: \(movieReleaseDate)"
-        cell.movieReleaseDate.sizeToFit()
-        cell.movieVoteCount.text = "Voted: \(movieVoteCount)"
-        cell.movieVoteCount.sizeToFit()
-        cell.movieOverview.text = "Overview: \(movieOverview)"
-        cell.movieOverview.sizeToFit()
+        
+        loadMovieToCell(movie: movie, indexPath: indexPath, cell: cell)
         
         return cell
     }
+    
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         movieDetailTableView.backgroundColor = UIColor.clear
         cell.backgroundColor = UIColor(white: 0, alpha: 0.8)
@@ -91,5 +95,4 @@ class DetailViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 450
     }
-
 }

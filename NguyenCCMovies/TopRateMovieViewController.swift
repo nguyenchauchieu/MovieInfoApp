@@ -90,31 +90,25 @@ class TopRateMovieViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let nextViewController = segue.destination as! DetailViewController
-        let indexPath = moviesTableView.indexPathForSelectedRow
         
-        let currentCell = moviesTableView.cellForRow(at: indexPath!) as! MovieTableViewCell
+        let indexPath = moviesTableView.indexPathForSelectedRow
         moviesTableView.deselectRow(at: indexPath!, animated: true)
+        let currentCell = moviesTableView.cellForRow(at: indexPath!) as! MovieTableViewCell
         
         let image = currentCell.movieImageView.image
-        let movieTitle = getValue(for: "title", in: movies, at: indexPath!)
-        let releaseDate = getValue(for: "release_date", in: movies, at: indexPath!)
-        let overview = getValue(for: "overview", in: movies, at: indexPath!)
-        let rated = getValue(for: "vote_average", in: movies, at: indexPath!)
-        let numberOfVote = getValue(for: "vote_count", in: movies, at: indexPath!)
+        
+        let movie: Movie
+        if searchActive {
+            movie = Movie.init(movie: filteredMovies[(indexPath?.row)!])
+        } else {
+            movie = Movie.init(movie: movies[(indexPath?.row)!])
+        }
         nextViewController.backgroundImage = image!
-        nextViewController.movieTitle = movieTitle
-        nextViewController.movieReleaseDate = releaseDate
-        nextViewController.movieOverview = overview
-        nextViewController.movieAverageRated = rated
-        nextViewController.movieVoteCount = numberOfVote
+        nextViewController.movie = movie
     }
     
     func refreshPage() -> Void {
         fetchMovieData()
-    }
-    
-    func getValue(for key: String, in movies: [NSDictionary], at indexPath: IndexPath) -> String {
-        return "\(String(describing: movies[(indexPath.row)].value(forKey: key)!))"
     }
 }
 
@@ -146,15 +140,14 @@ extension TopRateMovieViewController: UITableViewDelegate, UITableViewDataSource
     }
     
     func loadMovieToCell(movies: [NSDictionary], indexPath: IndexPath, cell: MovieTableViewCell) -> Void {
-        let imagePath = imageBaseURL + "\(movies[indexPath.row]["poster_path"]!)"
+        let movie = Movie.init(movie: movies[indexPath.row])
+        let imagePath = imageBaseURL + "\(movie.posterPath!)"
         let posterRequest = URLRequest(url: URL(string: imagePath)!)
-        
         let backgroundView = UIView()
         backgroundView.backgroundColor = UIColor.brown
         cell.selectedBackgroundView = backgroundView
-        
-        cell.movieTitleLabel.text = "\(movies[indexPath.row]["title"]!)"
-        cell.movieDescriptionLabel.text = "\(movies[indexPath.row]["overview"]!)"
+        cell.movieTitleLabel.text = "\(movie.title!)"
+        cell.movieDescriptionLabel.text = "\(movie.overview!)"
         cell.movieImageView.setImageWith(
             posterRequest,
             placeholderImage: nil,
